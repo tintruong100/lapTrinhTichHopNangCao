@@ -1,32 +1,18 @@
 [
     {
         "id": 1,
-        "name": "Bo",
-        "phone": "0388697312",
-        "email": "tin@gmail.com"
+        "name": "Lê Nguyễn Phước Thanh",
+        "phone": "0111222333",
+        "email": "tin.truong.100@gmail.vn",
+        "createdAt": "2025-04-17T17:23:49.652Z",
+        "updatedAt": "2025-04-17T17:32:53.381Z"
     },
     {
         "id": 2,
-        "name": "Bo",
+        "name": "Ngô Trương Đức Tín",
         "phone": "0388697312",
-        "email": "tin@gmail.com"
-    },
-    {
-        "id": 3,
-        "name": "Bo",
-        "phone": "0388697312",
-        "email": "tin@gmail.com"
-    },
-    {
-        "id": 4,
-        "name": "Bo",
-        "phone": "0388697312",
-        "email": "tin@gmail.com"
-    },
-    {
-        "id": 5,
-        "name": "Thanh",
-        "phone": "11222",
-        "email": "thanh@gmail.com"
+        "email": "tin.truong.100@gmail.com",
+        "createdAt": "2025-04-17T17:32:42.455Z",
+        "updatedAt": "2025-04-17T17:32:53.383Z"
     }
 ]
