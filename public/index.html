@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,13 +8,23 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">Quản lý danh bạ</h2>
-        
+        <h2 class="text-center mb-4">Quản lý danh bạ</h2>
+            <!-- Ô tìm kiếm -->
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tìm kiếm theo tên, số điện thoại hoặc email...">
+                    <button class="btn btn-primary" id="searchButton">Tìm</button>
+                </div>
+            </div>
+        <!-- Nút hiển thị form -->
+        <div class="text-start mb-3">
+            <button class="btn btn-success" id="showFormBtn">+ Thêm liên hệ</button>
+        </div>
+
         <!-- Form thêm/chỉnh sửa liên hệ -->
-        <div class="card p-3 mb-4">
+        <div class="card p-3 mb-4 d-none" id="formCard">
             <h5 id="formTitle">Thêm liên hệ</h5>
             <form id="contactForm">
-                <input type="hidden" id="editIndex"> <!-- Lưu index để chỉnh sửa -->
                 <div class="mb-2">
                     <input type="text" id="name" class="form-control" placeholder="Tên liên hệ" required>
                 </div>
@@ -28,13 +38,13 @@
                 <button type="button" class="btn btn-secondary d-none" id="cancelEdit">Hủy</button>
             </form>
         </div>
-        
-        <!-- Danh sách liên hệ -->
-        <div class="card p-3">
+
+        <div class="card p-3" id="contactCard">
             <h5>Danh sách liên hệ</h5>
             <table class="table table-bordered mt-2">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Tên</th>
                         <th>Số điện thoại</th>
                         <th>Email</th>
@@ -42,12 +52,12 @@
                     </tr>
                 </thead>
                 <tbody id="contactList">
-                    <!-- Dữ liệu sẽ được thêm vào đây -->
+                    <!-- Dữ liệu sẽ được thêm bằng script.js -->
                 </tbody>
             </table>
         </div>
     </div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>

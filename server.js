@@ -3,7 +3,7 @@ const cors = require("cors");
 const path = require("path");
 
 // Chú ý: 'route' chứ không phải 'routes'
-const customerRouter = require("./route/customerRouter");
+const customerRouter = require("./routes/customerRouter");
 
 const app = express();
 

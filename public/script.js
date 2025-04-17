@@ -1,66 +1,143 @@
-const contactForm = document.getElementById("contactForm");
 const contactList = document.getElementById("contactList");
-const cancelEdit = document.getElementById("cancelEdit");
+const contactForm = document.getElementById("contactForm");
 const formTitle = document.getElementById("formTitle");
-let contacts = [];
-let editIndex = -1;
+const cancelEditBtn = document.getElementById("cancelEdit");
+const addContactBtn = document.getElementById("addContactBtn");
+const contactCard = document.getElementById("contactCard");
 
-function renderContacts() {
+let contacts = [];
+let isEditing = false;
+let editId = null;
+
+// Tải dữ liệu từ API
+async function fetchContacts() {
+    const res = await fetch("/api/customers");
+    contacts = await res.json();
+}
+
+// Hiển thị danh sách lọc theo kết quả tìm kiếm
+function renderFilteredContacts(filtered) {
     contactList.innerHTML = "";
-    contacts.forEach((contact, index) => {
+
+    filtered.forEach((contact, index) => {
         contactList.innerHTML += `
             <tr>
+                <td>${contact.id}</td>
                 <td>${contact.name}</td>
                 <td>${contact.phone}</td>
                 <td>${contact.email}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editContact(${index})">Sửa</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteContact(${index})">Xóa</button>
+                    <button class="btn btn-warning btn-sm" onclick="editContact(${contact.id})">Sửa</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteContact(${contact.id})">Xóa</button>
                 </td>
             </tr>
         `;
     });
 }
 
-contactForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    const name = document.getElementById("name").value;
-    const phone = document.getElementById("phone").value;
-    const email = document.getElementById("email").value;
+// Tìm kiếm khi nhấn nút
+document.getElementById("searchButton").addEventListener("click", async () => {
+    const keyword = document.getElementById("searchInput").value.toLowerCase();
+    await fetchContacts();
 
-    if (editIndex === -1) {
-        contacts.push({ name, phone, email });
+    const filtered = contacts.filter(c =>
+        c.name.toLowerCase().includes(keyword) ||
+        c.phone.toLowerCase().includes(keyword) ||
+        c.email.toLowerCase().includes(keyword)
+    );
+
+    if (filtered.length > 0) {
+        renderFilteredContacts(filtered);
+        contactCard.classList.remove("d-none");
     } else {
-        contacts[editIndex] = { name, phone, email };
-        editIndex = -1;
-        formTitle.textContent = "Thêm liên hệ";
-        contactForm.querySelector("button[type=submit]").textContent = "Thêm";
-        cancelEdit.classList.add("d-none");
+        contactCard.classList.add("d-none");
+        alert("Không tìm thấy kết quả phù hợp.");
     }
-    renderContacts();
-    contactForm.reset();
 });
 
-function deleteContact(index) {
-    contacts.splice(index, 1);
-    renderContacts();
-}
+// Bắt sự kiện Enter để tìm
+document.getElementById("searchInput").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+        document.getElementById("searchButton").click();
+    }
+});
 
-function editContact(index) {
-    const contact = contacts[index];
+// Hiển thị form
+document.getElementById("showFormBtn").addEventListener("click", () => {
+    document.getElementById("formCard").classList.toggle("d-none");
+    formTitle.textContent = "Thêm liên hệ";
+    contactForm.reset();
+    isEditing = false;
+    editId = null;
+    cancelEditBtn.classList.add("d-none");
+});
+
+// Gửi form thêm/sửa
+contactForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const email = document.getElementById("email").value.trim();
+
+    const data = { name, phone, email };
+
+    if (isEditing && editId !== null) {
+        await fetch(`/api/customers/${editId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+    } else {
+        await fetch("/api/customers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+    }
+
+    contactForm.reset();
+    document.getElementById("formCard").classList.add("d-none");
+    isEditing = false;
+    editId = null;
+    cancelEditBtn.classList.add("d-none");
+    document.getElementById("searchButton").click(); // cập nhật danh sách nếu đang hiện
+});
+
+// Sửa liên hệ
+async function editContact(id) {
+    const contact = contacts.find(c => c.id === id);
+    if (!contact) return;
+
     document.getElementById("name").value = contact.name;
     document.getElementById("phone").value = contact.phone;
     document.getElementById("email").value = contact.email;
-    editIndex = index;
+
+    isEditing = true;
+    editId = id;
     formTitle.textContent = "Chỉnh sửa liên hệ";
-    contactForm.querySelector("button[type=submit]").textContent = "Lưu";
-    cancelEdit.classList.remove("d-none");
+    document.getElementById("formCard").classList.remove("d-none");
+    cancelEditBtn.classList.remove("d-none");
 }
 
-cancelEdit.addEventListener("click", function () {
-    editIndex = -1;
+// Hủy chỉnh sửa
+cancelEditBtn.addEventListener("click", () => {
     contactForm.reset();
+    isEditing = false;
+    editId = null;
     formTitle.textContent = "Thêm liên hệ";
-    contactForm.querySelector("button[type=submit]").textContent = "Thêm";
-    cancelEdit.classList.add("d-none");
+    cancelEditBtn.classList.add("d-none");
+    document.getElementById("formCard").classList.add("d-none");
+});
+
+// Xóa liên hệ
+async function deleteContact(id) {
+    if (confirm("Bạn có chắc chắn muốn xóa liên hệ này không?")) {
+        await fetch(`/api/customers/${id}`, { method: "DELETE" });
+        document.getElementById("searchButton").click(); // làm mới danh sách
+    }
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+    await fetchContacts();
+    renderFilteredContacts(contacts);
 });

@@ -3,25 +3,27 @@ const fs = require("fs");
 const path = require("path");
 
 const router = express.Router();
-const dataPath = path.join(__dirname, "../data/customerdata.json"); 
+const dataPath = path.join(__dirname, "../data/customerdata.json");
 
-// Đọc dữ liệu từ file JSON
+// Đọc dữ liệu
 const readData = () => {
+    if (!fs.existsSync(dataPath)) return [];
     const rawData = fs.readFileSync(dataPath);
     return JSON.parse(rawData);
 };
 
-// Ghi dữ liệu vào file JSON
+// Ghi dữ liệu
 const writeData = (data) => {
     fs.writeFileSync(dataPath, JSON.stringify(data, null, 4));
 };
 
-// Lấy danh sách khách hàng
+// Lấy danh sách tất cả khách hàng
 router.get("/", (req, res) => {
-    res.json(readData());
+    const customers = readData();
+    res.json(customers);
 });
 
-// Lấy thông tin một khách hàng cụ thể
+// Lấy 1 khách hàng theo ID
 router.get("/:id", (req, res) => {
     const customers = readData();
     const customer = customers.find(c => c.id === parseInt(req.params.id));
@@ -29,7 +31,7 @@ router.get("/:id", (req, res) => {
     res.json(customer);
 });
 
-// Thêm một khách hàng mới
+// Thêm khách hàng mới
 router.post("/", (req, res) => {
     const customers = readData();
     const newCustomer = {
@@ -39,12 +41,15 @@ router.post("/", (req, res) => {
         email: req.body.email
     };
     customers.push(newCustomer);
-    writeData(customers);
+
+    // Gán lại ID liên tục từ 1
+    const updated = customers.map((c, i) => ({ ...c, id: i + 1 }));
+    writeData(updated);
+
     res.status(201).json(newCustomer);
 });
 
 // Cập nhật thông tin khách hàng
-//123
 router.put("/:id", (req, res) => {
     let customers = readData();
     const index = customers.findIndex(c => c.id === parseInt(req.params.id));
@@ -61,16 +66,20 @@ router.put("/:id", (req, res) => {
     res.json(customers[index]);
 });
 
-// Xóa một khách hàng
+// Xóa khách hàng và cập nhật lại ID
 router.delete("/:id", (req, res) => {
     let customers = readData();
-    const newCustomers = customers.filter(c => c.id !== parseInt(req.params.id));
-    
-    if (customers.length === newCustomers.length) {
+    const idToDelete = parseInt(req.params.id);
+    const newCustomers = customers.filter(c => c.id !== idToDelete);
+
+    if (newCustomers.length === customers.length) {
         return res.status(404).json({ message: "Không tìm thấy khách hàng" });
     }
 
-    writeData(newCustomers);
+    // Gán lại ID tuần tự
+    const updated = newCustomers.map((c, i) => ({ ...c, id: i + 1 }));
+    writeData(updated);
+
     res.json({ message: "Khách hàng đã được xóa" });
 });
 
